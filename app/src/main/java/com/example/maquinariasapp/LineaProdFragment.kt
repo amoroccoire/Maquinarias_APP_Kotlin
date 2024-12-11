@@ -1,31 +1,42 @@
 package com.example.maquinariasapp
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.CheckBox
+import android.widget.EditText
+import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
+import androidx.lifecycle.ViewModelProvider
+import com.example.maquinariasapp.data.RowData
+import com.example.maquinariasapp.ui.linProduccion.LineaProduccionViewModel
+import com.example.maquinariasapp.ui.maeMaquinaria.MaestroMaquinariaViewModel
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [LineaProdFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class LineaProdFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+
+    lateinit var viewModel: LineaProduccionViewModel
+    private var operationType: Int = 0
+
+    lateinit var editLCod: EditText
+    lateinit var txtLCod: TextView
+
+    lateinit var btnLGuardar: Button
+    lateinit var btnLEliminar: Button
+
+    lateinit var cod: EditText
+    lateinit var nom: EditText
+    lateinit var checkL: CheckBox
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+            operationType = it.getInt("operationType", 0) // Por defecto, 0 si no se pasa nada
         }
     }
 
@@ -33,27 +44,116 @@ class LineaProdFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
+        viewModel = ViewModelProvider(requireActivity())[LineaProduccionViewModel::class.java]
         return inflater.inflate(R.layout.fragment_linea_prod, container, false)
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment LineaProdFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            LineaProdFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // Observa el RowData seleccionado
+        cod = view.findViewById(R.id.editLCod)
+        Log.d("Fragment", "Actividad asociada: ${requireActivity()}")
+        Log.d("EditFragment", "Antes de viewModel ${viewModel}")
+
+        viewModel.selectedRowData.observe(viewLifecycleOwner) { rowData ->
+            Log.d("EditFragment", "RowData recibido: $rowData")
+
+            if (rowData != null) {
+                Log.d("EditFragment", "RowData para editar: ${rowData.cells}")
+                Log.d("EditFragment", "Tipo de operación: $operationType")
+                // Configura tus vistas según el tipo de operación
+                cod.setText(rowData.cells[0])
+                nom.setText(rowData.cells[1])
+                checkL.isChecked = rowData.cells[2] == "A"
+            } else {
+                Log.d("EditFragment", "selectedRowData es null")
             }
+        }
+        btnLGuardar = view.findViewById(R.id.btnLGuardar)
+        btnLEliminar = view.findViewById(R.id.btnLEliminar)
+
+
+        setUpButtonGuardar(view)
+        if (operationType == 1)
+            setUpButtonEliminar(view)
+        if (operationType == 1) {
+            editLCod = view.findViewById(R.id.editLCod)
+            editLCod.isEnabled = false
+            editLCod.isFocusable = false
+        }
+        else if (operationType == 2) { //operacion guardar el boton eliminar se desactiva
+            editLCod = view.findViewById(R.id.editLCod)
+            txtLCod = view.findViewById(R.id.txtLCod)
+            btnLEliminar.isEnabled = false
+            btnLEliminar.alpha = 0.5f
+            checkL.isChecked = true
+            //editLCod.isEnabled = false
+            //editLCod.visibility = View.GONE
+            //txtLCod.visibility = View.GONE
+        }
+    }
+
+    private fun setUpButtonGuardar(view: View) {
+        nom = view.findViewById(R.id.editLNom)
+        checkL = view.findViewById(R.id.checkL)
+
+        btnLGuardar.setOnClickListener {
+            val nombre = nom.text.toString()
+            val estadoRegistro = if (checkL.isChecked) "A" else "I"
+
+            if (operationType == 1) {
+                Log.d("EN SETUPBUTTON GUARDAR", "La operacion es 1, antes de funcion")
+                viewModel.updateSelectedRowDataWithoutCode(
+                    nombre,
+                    estadoRegistro
+                )
+                Log.d("EN SETUPBUTTON GUARDAR", "La operacion es 1, luego de funcion")
+                requireActivity().supportFragmentManager.popBackStack()
+            }
+            else if (operationType == 2) {
+                //enviar a la base de datos
+                cod = view.findViewById(R.id.editLCod)
+                val codigo = cod.text.toString()
+
+                val newData = RowData(
+                    cells = mutableListOf(
+                        codigo,
+                        nombre,
+                        "A"
+                    )
+                )
+                viewModel.addRowData(newData)
+                requireActivity().supportFragmentManager.popBackStack()
+            }
+        }
+
+    }
+
+    private fun setUpButtonEliminar(view: View) {
+        btnLEliminar.setOnClickListener {
+            val alertDialog = AlertDialog.Builder(requireContext())
+                .setTitle("Confirmación")
+                .setMessage("¿Estás seguro de que deseas eliminar este elemento?")
+                .setPositiveButton("Continuar") { dialog, _ ->
+                    // Acción al presionar "Continuar"
+                    viewModel.eliminarElementoSeleccionado()
+                    dialog.dismiss() // Cierra el diálogo
+                    requireActivity().supportFragmentManager.popBackStack()
+                }
+                .setNegativeButton("Cancelar") { dialog, _ ->
+                    // Acción al presionar "Cancelar"
+                    dialog.dismiss() // Solo cierra el diálogo
+                }
+                .create()
+
+            alertDialog.show()
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        // Limpia el RowData al retroceder
+        viewModel.clearSelectedRowData()
     }
 }
