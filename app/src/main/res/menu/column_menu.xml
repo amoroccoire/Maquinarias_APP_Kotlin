@@ -3,9 +3,9 @@
     <item
         android:id="@+id/action_hide"
         android:title="Ocultar" />
-    <item
+    <!--<item
         android:id="@+id/action_replace"
-        android:title="Reemplazar" />
+        android:title="Reemplazar" /> -->
     <item
         android:id="@+id/action_add"
         android:title="Añadir" />
