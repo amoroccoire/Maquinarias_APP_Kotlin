@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="284dp"
             android:layout_marginTop="168dp"
-            android:text="Inactivar"
+            android:text="Estado"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
