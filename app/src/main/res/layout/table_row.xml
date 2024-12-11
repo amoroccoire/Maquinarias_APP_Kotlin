@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -8,57 +9,29 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="8dp"
+        android:padding="15dp"
+        android:clickable="true"
+        android:focusable="true"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:id="@+id/itemCod"
-            android:layout_width="0dp"
+        <ImageView
+            android:id="@+id/editRow"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:padding="8dp"
-            android:text="Row Codigo"></TextView>
+            android:visibility="gone"
+            android:clickable="true"
+            android:focusable="true"
+            app:srcCompat="@drawable/arrow" />
 
-        <TextView
-            android:id="@+id/itemNom"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:id="@+id/cellContainer"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:padding="8dp"
-            android:text="Row nombre"></TextView>
+            android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/itemLinPro"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:padding="8dp"
-            android:text="Linea\nProduccion"></TextView>
-
-        <TextView
-            android:id="@+id/itemPlaPro"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:padding="8dp"
-            android:text="Planta\nProduccion"></TextView>
-
-        <TextView
-            android:id="@+id/itemUbi"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:padding="8dp"
-            android:text="Ubicacion"></TextView>
-
-        <TextView
-            android:id="@+id/itemEstReg"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:padding="8dp"
-            android:text="Estado\nregistro"></TextView>
+        </LinearLayout>
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
